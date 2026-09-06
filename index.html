@@ -7,12 +7,15 @@
   <!-- GitHub Pages SPA Redirect Decoder (Restores clean URL from 404.html redirect) -->
   <script type="text/javascript">
     (function(l) {
-      if (l.search[1] === '/' ) {
-        var decoded = l.search.slice(1).split('&').map(function(s) { 
+      if (l.search && (l.search[1] === '/' || l.search.indexOf('?admin-login') === 0 || l.search.indexOf('?services') === 0 || l.search.indexOf('?tuning') === 0 || l.search.indexOf('?4x4') === 0 || l.search.indexOf('?contact') === 0 || l.search.indexOf('?booking') === 0 || l.search.indexOf('?admin') === 0 || l.search.indexOf('?submit-review') === 0)) {
+        var rawQuery = l.search.slice(1);
+        if (!rawQuery.startsWith('/')) rawQuery = '/' + rawQuery;
+        var decoded = rawQuery.split('&').map(function(s) { 
           return s.replace(/~and~/g, '&')
         }).join('?');
+        var basePath = l.pathname.endsWith('/') ? l.pathname.slice(0, -1) : l.pathname;
         window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
+            basePath + decoded + l.hash
         );
       }
     }(window.location));
@@ -43,7 +46,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2.1">
+  <link rel="stylesheet" href="style.css?v=2.3">
   
   <!-- Lucide Icons Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -252,6 +255,6 @@
   <div class="toast-container" id="toast-container-id"></div>
 
   <!-- Main Application Script -->
-  <script src="app.js?v=2.1"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>
