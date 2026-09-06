@@ -8,7 +8,7 @@
 const API_BASE_URL = window.API_BASE_URL || (
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
-    : 'https://dieseldrive-api.onrender.com'
+    : 'https://dieseldrive.onrender.com'
 );
 
 // 1. App State
