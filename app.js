@@ -2,6 +2,15 @@
    DIESEL DRIVE - CORE APP CONTROLLER (EXPRESS API & SQLITE SYNC & WHATSAPP)
    ========================================================================== */
 
+// Backend API Base URL:
+// Automatically uses relative path '' when on localhost, and the live production URL when on GitHub Pages.
+// Note: Update 'https://dieseldrive-api.onrender.com' with your actual backend URL once deployed on Render/Railway!
+const API_BASE_URL = window.API_BASE_URL || (
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://dieseldrive-api.onrender.com'
+);
+
 // 1. App State
 const state = {
   currentRoute: '#/',
@@ -323,7 +332,7 @@ function setupScrollAnimations() {
 
 async function fetchReviews() {
   try {
-    const res = await fetch('/api/reviews');
+    const res = await fetch(`${API_BASE_URL}/api/reviews`);
     if (res.ok) {
       state.reviews = await res.json();
     }
@@ -335,10 +344,10 @@ async function fetchReviews() {
 
 async function fetchAdminData() {
   try {
-    const resB = await fetch('/api/bookings');
+    const resB = await fetch(`${API_BASE_URL}/api/bookings`);
     if (resB.ok) state.bookingsList = await resB.json();
     
-    const resR = await fetch('/api/reviews');
+    const resR = await fetch(`${API_BASE_URL}/api/reviews`);
     if (resR.ok) state.adminReviewsList = await resR.json();
   } catch (err) {
     console.error('Error fetching admin data:', err);
@@ -369,7 +378,7 @@ async function validateReviewToken(fullHash) {
   state.reviewInviteStatus = 'loading';
 
   try {
-    const res = await fetch(`/api/invites/${token}`);
+    const res = await fetch(`${API_BASE_URL}/api/invites/${token}`);
     if (res.ok) {
       const invite = await res.json();
       if (invite.status === 'Pending') {
@@ -632,36 +641,38 @@ function renderHome(container) {
 
   container.innerHTML = `
     <!-- Split Layout Editorial Hero -->
-    <section class="editorial-hero-grid">
-      
-      <!-- Left: Massive Typography -->
-      <div class="container hero-text-side slide-in-left">
-        <div class="hero-badge"><i data-lucide="award"></i> Certified Specialists since 1991</div>
-        <h1>Engine Tuning & <br><span class="accent-text">Heavy 4WD Repairs</span></h1>
-        <p>Premium electronic diagnostic scanner runs, torque tuning, DPF/EGR cleaning, and complete diesel engine rebuilds. We specialize in Nissan Patrol, Toyota Hilux, Prado, and Mitsubishi Pajero models.</p>
-        <div class="hero-actions">
-          <a href="#/booking" class="btn btn-primary" title="Book service via WhatsApp"><i data-lucide="calendar"></i> Book Online Now</a>
-          <a href="#/services" class="btn btn-secondary" title="View mechanical services">Explore Our Services</a>
+    <section class="hero-section-bg">
+      <div class="editorial-hero-grid">
+        
+        <!-- Left: Massive Typography -->
+        <div class="hero-text-side slide-in-left">
+          <div class="hero-badge"><i data-lucide="award"></i> Certified Specialists since 1991</div>
+          <h1>Engine Tuning & <br><span class="accent-text">Heavy 4WD Repairs</span></h1>
+          <p>Premium electronic diagnostic scanner runs, torque tuning, DPF/EGR cleaning, and complete diesel engine rebuilds. We specialize in Nissan Patrol, Toyota Hilux, Prado, and Mitsubishi Pajero models.</p>
+          <div class="hero-actions">
+            <a href="#/booking" class="btn btn-primary" title="Book service via WhatsApp"><i data-lucide="calendar"></i> Book Online Now</a>
+            <a href="#/services" class="btn btn-secondary" title="View mechanical services">Explore Our Services</a>
+          </div>
         </div>
-      </div>
 
-      <!-- Right: Overlapping Layered Collage -->
-      <div class="collage-side slide-in-right">
-        <div class="collage-wrapper">
-          <div class="collage-img collage-img-1">
-            <img src="images/hero_4x4.png" alt="Diesel Toyota 4x4 crawling offroad New Zealand">
+        <!-- Right: Overlapping Layered Collage -->
+        <div class="collage-side slide-in-right">
+          <div class="collage-wrapper">
+            <div class="collage-img collage-img-1">
+              <img src="images/hero_4x4.png" alt="Diesel Toyota 4x4 crawling offroad New Zealand">
+            </div>
+            <div class="collage-img collage-img-2">
+              <img src="images/service_tuning.png" alt="Tuning truck on dyno rollers">
+            </div>
+            <div class="collage-img collage-img-3">
+              <img src="images/service_diagnostics.png" alt="OBD2 code scanner check">
+            </div>
+            <div class="floating-accent-badge badge-position-1 floating">021 0258 3793</div>
+            <div class="floating-accent-badge badge-position-2 floating">OTAHUHU, AKL</div>
           </div>
-          <div class="collage-img collage-img-2">
-            <img src="images/service_tuning.png" alt="Tuning truck on dyno rollers">
-          </div>
-          <div class="collage-img collage-img-3">
-            <img src="images/service_diagnostics.png" alt="OBD2 code scanner check">
-          </div>
-          <div class="floating-accent-badge badge-position-1 floating">021 0258 3793</div>
-          <div class="floating-accent-badge badge-position-2 floating">OTAHUHU, AKL</div>
         </div>
-      </div>
 
+      </div>
     </section>
 
     <!-- Upgraded Component: Diagnostic Tool Cost Estimator -->
@@ -1698,7 +1709,7 @@ window.handleBookingSubmit = async function(event) {
   // 1. Submit record to SQLite Database API
   let bookingId = null;
   try {
-    const res = await fetch('/api/bookings', {
+    const res = await fetch(`${API_BASE_URL}/api/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(state.booking)
@@ -1873,7 +1884,7 @@ window.handleAdminLoginSubmit = async function(event) {
   const password = document.getElementById('admin-pass').value;
 
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch(`${API_BASE_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -2241,7 +2252,7 @@ window.handleAdminLogout = function() {
 
 window.updateBookingStatus = async function(id, newStatus) {
   try {
-    const res = await fetch(`/api/bookings/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
@@ -2263,7 +2274,7 @@ window.deleteBooking = async function(id) {
   if (!confirm(`Are you sure you want to delete Booking #${id} permanently?`)) return;
 
   try {
-    const res = await fetch(`/api/bookings/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
       method: 'DELETE'
     });
     
@@ -2283,7 +2294,7 @@ window.deleteReview = async function(id) {
   if (!confirm(`Are you sure you want to delete review #${id} permanently from database?`)) return;
 
   try {
-    const res = await fetch(`/api/reviews/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/api/reviews/${id}`, {
       method: 'DELETE'
     });
     
@@ -2308,7 +2319,7 @@ window.handleGenerateInviteSubmit = async function(event) {
   if (!name || !vehicle) return;
   
   try {
-    const res = await fetch('/api/invites', {
+    const res = await fetch(`${API_BASE_URL}/api/invites`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, vehicle })
@@ -2316,7 +2327,8 @@ window.handleGenerateInviteSubmit = async function(event) {
 
     if (res.ok) {
       const data = await res.json();
-      const baseUrl = `${window.location.protocol}//${window.location.host}/#/submit-review`;
+      const currentPath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+      const baseUrl = `${window.location.origin}${currentPath}/#/submit-review`;
       state.generatedInviteUrl = `${baseUrl}?token=${data.token}`;
       showToast('Token Generated', 'Unique one-time link created successfully.', 'success');
       router();
@@ -2532,7 +2544,7 @@ window.handleClientReviewSubmit = async function(event) {
   }
 
   try {
-    const res = await fetch('/api/reviews', {
+    const res = await fetch(`${API_BASE_URL}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, vehicle, rating, quote, avatar, token })

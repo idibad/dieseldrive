@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
@@ -6,6 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_PATH = path.join(__dirname, 'dieseldrive.db');
 
+// Enable CORS so frontend on GitHub Pages can communicate with backend
+app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Increase body size limit to support Base64 photo uploads
 
 // Serve static frontend files
