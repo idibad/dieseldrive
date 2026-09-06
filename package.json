@@ -2,6 +2,9 @@
   "name": "dieseldrive",
   "version": "1.0.0",
   "description": "Diesel Drive Auckland - Premium Website",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
