@@ -46,11 +46,12 @@ const state = {
   activeReviewIdx: 0,
 
   // Admin Dashboard state
-  adminTab: 'bookings', // 'bookings' | 'reviews' | 'invite'
+  adminTab: 'bookings', // 'bookings' | 'reviews' | 'invite' | 'security'
   adminSearchQuery: '',
   adminStatusFilter: 'all', // 'all' | 'Pending' | 'Confirmed' | 'Completed'
   bookingsList: [],
   adminReviewsList: [],
+  currentAdminUsername: 'admin',
   generatedInviteUrl: '',
   inviteName: '',
   inviteVehicle: '',
@@ -349,6 +350,12 @@ async function fetchAdminData() {
     
     const resR = await fetch(`${API_BASE_URL}/api/reviews`);
     if (resR.ok) state.adminReviewsList = await resR.json();
+
+    const resU = await fetch(`${API_BASE_URL}/api/admin/current-user`);
+    if (resU.ok) {
+      const uData = await resU.json();
+      state.currentAdminUsername = uData.username || 'admin';
+    }
   } catch (err) {
     console.error('Error fetching admin data:', err);
   }
@@ -2119,6 +2126,71 @@ function renderAdminDashboard(container) {
         ` : ''}
       </div>
     `;
+  } else if (state.adminTab === 'security') {
+    tabContentHtml = `
+      <div class="invite-generator-box">
+        <div style="display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.2rem;">
+          <div style="background: rgba(255, 107, 0, 0.12); color: var(--accent-primary); width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 107, 0, 0.25);">
+            <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.35rem; text-transform: uppercase; font-weight: 800; color: var(--carbon-dark); margin: 0;">Account & Security Settings</h3>
+            <p style="color: var(--text-gray); font-size: 0.92rem; margin: 0.2rem 0 0 0;">Update administrator credentials for workshop portal authentication.</p>
+          </div>
+        </div>
+
+        <div style="background: var(--bg-darker); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.1rem 1.4rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Active Administrator Account</span>
+            <strong style="font-size: 1.15rem; color: var(--carbon-dark); font-family: var(--font-heading);">${state.currentAdminUsername || 'admin'}</strong>
+          </div>
+          <span style="background: #ECFDF5; color: #064E3B; border: 1px solid #A7F3D0; padding: 0.35rem 0.9rem; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span> Active
+          </span>
+        </div>
+
+        <form id="admin-security-form" onsubmit="handleUpdateCredentialsSubmit(event)">
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="sec-curr-pass" style="font-weight: 700; font-size: 0.88rem; color: var(--carbon-dark); margin-bottom: 0.5rem; display: block;">Current Password <span style="color: #EF4444;">*</span></label>
+            <div style="position: relative;">
+              <input type="password" id="sec-curr-pass" class="form-input" required placeholder="Enter current admin password" style="width: 100%; padding-right: 2.8rem;">
+              <button type="button" onclick="togglePasswordVisibility('sec-curr-pass', 'sec-curr-eye')" style="position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-gray); padding: 0;" aria-label="Toggle password visibility">
+                <i data-lucide="eye" id="sec-curr-eye" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="sec-new-user" style="font-weight: 700; font-size: 0.88rem; color: var(--carbon-dark); margin-bottom: 0.5rem; display: block;">New Username <span style="color: #EF4444;">*</span></label>
+              <input type="text" id="sec-new-user" class="form-input" required minlength="3" value="${state.currentAdminUsername || 'admin'}" placeholder="e.g. workshop_owner" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label for="sec-new-pass" style="font-weight: 700; font-size: 0.88rem; color: var(--carbon-dark); margin-bottom: 0.5rem; display: block;">New Password <span style="color: #EF4444;">*</span></label>
+              <div style="position: relative;">
+                <input type="password" id="sec-new-pass" class="form-input" required minlength="4" placeholder="Minimum 4 characters" style="width: 100%; padding-right: 2.8rem;">
+                <button type="button" onclick="togglePasswordVisibility('sec-new-pass', 'sec-new-eye')" style="position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-gray); padding: 0;" aria-label="Toggle password visibility">
+                  <i data-lucide="eye" id="sec-new-eye" style="width: 18px; height: 18px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="sec-confirm-pass" style="font-weight: 700; font-size: 0.88rem; color: var(--carbon-dark); margin-bottom: 0.5rem; display: block;">Confirm New Password <span style="color: #EF4444;">*</span></label>
+            <input type="password" id="sec-confirm-pass" class="form-input" required minlength="4" placeholder="Re-enter your new password" style="width: 100%;">
+          </div>
+
+          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <button type="submit" id="save-sec-btn" class="btn btn-primary" style="padding: 0.85rem 2rem;">
+              <i data-lucide="save"></i> Update Credentials
+            </button>
+            <span style="font-size: 0.84rem; color: var(--text-muted);">Changes take effect immediately across all sessions.</span>
+          </div>
+        </form>
+      </div>
+    `;
   }
 
   container.innerHTML = `
@@ -2136,7 +2208,7 @@ function renderAdminDashboard(container) {
           <div class="admin-top-actions">
             <div class="admin-user-tag">
               <span class="status-dot"></span>
-              <span>Owner Administrator</span>
+              <span>${state.currentAdminUsername || 'Owner Administrator'}</span>
             </div>
             <a href="#/" target="_blank" class="btn-admin-header btn-admin-view-site" title="Open Public Website">
               <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
@@ -2212,6 +2284,10 @@ function renderAdminDashboard(container) {
             <i data-lucide="link"></i>
             <span>Generate Review Invite</span>
           </button>
+          <button class="admin-tab-btn ${state.adminTab === 'security' ? 'active' : ''}" onclick="switchAdminTab('security')">
+            <i data-lucide="shield-check"></i>
+            <span>Account Security</span>
+          </button>
         </div>
 
         <!-- Dynamic Tab Panel Mount -->
@@ -2248,6 +2324,66 @@ window.handleAdminLogout = function() {
   sessionStorage.removeItem('adminToken');
   showToast('Logged Out', 'Successfully logged out from owner dashboard.', 'success');
   window.location.hash = '#/';
+};
+
+window.togglePasswordVisibility = function(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (input && icon) {
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+    if (window.lucide) window.lucide.createIcons();
+  }
+};
+
+window.handleUpdateCredentialsSubmit = async function(event) {
+  event.preventDefault();
+  const currentPassword = document.getElementById('sec-curr-pass').value;
+  const newUsername = document.getElementById('sec-new-user').value.trim();
+  const newPassword = document.getElementById('sec-new-pass').value;
+  const confirmPassword = document.getElementById('sec-confirm-pass').value;
+  const token = sessionStorage.getItem('adminToken');
+
+  if (newPassword !== confirmPassword) {
+    showToast('Password Mismatch', 'New password and confirmation do not match.', 'error');
+    return;
+  }
+
+  const saveBtn = document.getElementById('save-sec-btn');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<div class="loader" style="width: 14px; height: 14px; border-width: 2px; margin-right: 0.5rem; display: inline-block;"></div> Updating...`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/credentials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newUsername, newPassword, token })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      state.currentAdminUsername = data.username || newUsername;
+      showToast('Credentials Updated', 'Administrator username and password updated successfully.', 'success');
+      document.getElementById('sec-curr-pass').value = '';
+      document.getElementById('sec-new-pass').value = '';
+      document.getElementById('sec-confirm-pass').value = '';
+      router();
+    } else {
+      showToast('Update Failed', data.error || 'Failed to update credentials.', 'error');
+    }
+  } catch (err) {
+    console.error('Credentials update error:', err);
+    showToast('Connection Error', 'Failed to communicate with server.', 'error');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = `<i data-lucide="save"></i> Update Credentials`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
 };
 
 window.updateBookingStatus = async function(id, newStatus) {

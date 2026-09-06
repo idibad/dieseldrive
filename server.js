@@ -100,6 +100,25 @@ function initDatabase() {
         console.log("Database pre-populated with default owner bookings.");
       }
     });
+    // Admin Credentials Table (Persistent username & password management)
+    db.run(`
+      CREATE TABLE IF NOT EXISTS admin_credentials (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Ensure default admin credentials exist if table is empty
+    db.get("SELECT * FROM admin_credentials WHERE id = 1", (err, row) => {
+      if (!row) {
+        const defaultUser = process.env.ADMIN_USER || 'admin';
+        const defaultPass = process.env.ADMIN_PASS || 'admin';
+        db.run("INSERT OR REPLACE INTO admin_credentials (id, username, password) VALUES (1, ?, ?)", [defaultUser, defaultPass]);
+        console.log("Admin credentials initialized in database.");
+      }
+    });
   });
 }
 
@@ -108,13 +127,62 @@ function initDatabase() {
 // Admin Login Route (Owner Authentication)
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const validUser = process.env.ADMIN_USER || 'admin';
-  const validPass = process.env.ADMIN_PASS || 'admin';
-  if (username === validUser && password === validPass) {
-    res.json({ success: true, token: 'session_owner_token_9988' });
-  } else {
-    res.status(401).json({ success: false, error: 'Invalid admin credentials' });
+  db.get("SELECT * FROM admin_credentials WHERE id = 1", (err, row) => {
+    const validUser = row ? row.username : (process.env.ADMIN_USER || 'admin');
+    const validPass = row ? row.password : (process.env.ADMIN_PASS || 'admin');
+    if (username === validUser && password === validPass) {
+      res.json({ success: true, token: 'session_owner_token_9988', username: validUser });
+    } else {
+      res.status(401).json({ success: false, error: 'Invalid admin credentials' });
+    }
+  });
+});
+
+// Get Current Admin Username
+app.get('/api/admin/current-user', (req, res) => {
+  db.get("SELECT username FROM admin_credentials WHERE id = 1", (err, row) => {
+    const username = row ? row.username : (process.env.ADMIN_USER || 'admin');
+    res.json({ username });
+  });
+});
+
+// Update Admin Username and Password Route
+app.post('/api/admin/credentials', (req, res) => {
+  const { currentPassword, newUsername, newPassword, token } = req.body;
+  if (!token || token !== 'session_owner_token_9988') {
+    return res.status(401).json({ error: 'Unauthorized administrative access' });
   }
+  if (!currentPassword || !newUsername || !newPassword) {
+    return res.status(400).json({ error: 'All fields (current password, new username, new password) are required.' });
+  }
+
+  const cleanUser = newUsername.trim();
+  const cleanPass = newPassword.trim();
+
+  if (cleanUser.length < 3) {
+    return res.status(400).json({ error: 'New username must be at least 3 characters long.' });
+  }
+  if (cleanPass.length < 4) {
+    return res.status(400).json({ error: 'New password must be at least 4 characters long.' });
+  }
+
+  db.get("SELECT * FROM admin_credentials WHERE id = 1", (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    const validPass = row ? row.password : (process.env.ADMIN_PASS || 'admin');
+    if (currentPassword !== validPass) {
+      return res.status(400).json({ error: 'Current password does not match.' });
+    }
+
+    db.run(
+      "INSERT OR REPLACE INTO admin_credentials (id, username, password, updated_at) VALUES (1, ?, ?, CURRENT_TIMESTAMP)",
+      [cleanUser, cleanPass],
+      function(err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        console.log(`Admin credentials updated. New username: ${cleanUser}`);
+        res.json({ success: true, message: 'Username and password updated successfully.', username: cleanUser });
+      }
+    );
+  });
 });
 
 // Bookings Endpoints
