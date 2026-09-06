@@ -13,7 +13,7 @@ const API_BASE_URL = window.API_BASE_URL || (
 
 // 1. App State
 const state = {
-  currentRoute: '#/',
+  currentRoute: '/',
   booking: {
     firstName: '',
     lastName: '',
@@ -82,41 +82,44 @@ const estimatorMatrix = {
   }
 };
 
+// Base path detection: supports custom domain (root '/') and GitHub project subpath ('/dieseldrive')
+const BASE_PATH = window.location.pathname.startsWith('/dieseldrive') ? '/dieseldrive' : '';
+
 // 2. SEO Configurations (9 Routes)
 const seoConfig = {
-  '#/': {
+  '/': {
     title: 'Diesel Drive | Expert 4WD, SUV & Diesel Repair Auckland',
     description: 'Expert diesel mechanic services in Auckland. Rebuilding engines, high-tech electronic diagnostics, routine maintenance, and ECU remapping tuning since 1991.'
   },
-  '#/services': {
+  '/services': {
     title: 'Specialist Mechanical Services & FAQ | Diesel Drive Auckland',
     description: 'Dealer-level engine diagnostics, mechanical repairs, custom performance dyno tuning, 4x4 lift setups, and commercial fleet schedules in Otahuhu, Auckland.'
   },
-  '#/tuning': {
+  '/tuning': {
     title: 'ECU Remapping & Performance Tuning | Diesel Drive Auckland',
     description: 'Optimize your diesel vehicle performance. Custom ECU mapping, Dyno testing, Stage 1/2 profiles, DPF/EGR solutions for better towing power and fuel economy.'
   },
-  '#/4x4': {
+  '/4x4': {
     title: '4x4 Lift Kits, Diffs & Drivetrain Upgrades | Diesel Drive Auckland',
     description: 'Specialist off-road 4WD modifications. Rebuilding differentials, fitting suspension lift kits, heavy-duty clutches, and lockers for Hilux, Patrol, Prado.'
   },
-  '#/contact': {
+  '/contact': {
     title: 'Contact Us & Workshop Location | Diesel Drive Auckland',
     description: 'Visit our mechanic shop in Otahuhu, Auckland. Get directions, business hours, telephone contact, and fill out a direct workshop query form.'
   },
-  '#/booking': {
+  '/booking': {
     title: 'Book a Mechanic Service Online | Diesel Drive Auckland',
     description: 'Easily book your vehicle diagnostics, tune-ups, or repairs online. Fill in details and attach dashboard logs for priority check booking.'
   },
-  '#/admin-login': {
+  '/admin-login': {
     title: 'Owner Portal Login | Diesel Drive',
     description: 'Authorized administrative access gate for the Diesel Drive workshop owner.'
   },
-  '#/admin': {
+  '/admin': {
     title: 'Workshop Owner Dashboard | Diesel Drive',
     description: 'Owner management panel for booking requests, review verification, and client invite link generation.'
   },
-  '#/submit-review': {
+  '/submit-review': {
     title: 'Leave a Service Review | Diesel Drive',
     description: 'We value your feedback. Leave a service rating and comment for your vehicle repairs.'
   }
@@ -124,30 +127,62 @@ const seoConfig = {
 
 // 3. SPA Router (9 Routes)
 const routes = {
-  '#/': renderHome,
-  '#/services': renderServices,
-  '#/tuning': renderTuning,
-  '#/4x4': render4x4,
-  '#/contact': renderContact,
-  '#/booking': renderBooking,
-  '#/admin-login': renderAdminLogin,
-  '#/admin': renderAdminDashboard,
-  '#/submit-review': renderSubmitReview
+  '/': renderHome,
+  '/services': renderServices,
+  '/tuning': renderTuning,
+  '/4x4': render4x4,
+  '/contact': renderContact,
+  '/booking': renderBooking,
+  '/admin-login': renderAdminLogin,
+  '/admin': renderAdminDashboard,
+  '/submit-review': renderSubmitReview
 };
 
+function getCurrentRoutePath() {
+  // If legacy hash is accessed (e.g. #/admin-login or #/submit-review?token=xxx), migrate to clean URL
+  if (window.location.hash && window.location.hash.startsWith('#/')) {
+    const legacyPath = window.location.hash.slice(1);
+    const target = (BASE_PATH || '') + legacyPath;
+    window.history.replaceState(null, '', target);
+  }
+
+  let pathname = window.location.pathname;
+  if (BASE_PATH && pathname.startsWith(BASE_PATH)) {
+    pathname = pathname.slice(BASE_PATH.length);
+  }
+  if (!pathname || pathname === '' || pathname === '/index.html') {
+    pathname = '/';
+  }
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    pathname = pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
+function navigateTo(path) {
+  if (!path) path = '/';
+  if (path.startsWith('#/')) {
+    path = path.slice(1);
+  }
+  if (!path.startsWith('/')) {
+    path = '/' + path;
+  }
+  const fullTarget = (BASE_PATH || '') + path;
+  if (window.location.pathname + window.location.search !== fullTarget) {
+    window.history.pushState(null, '', fullTarget);
+  }
+  router();
+}
+
 function router() {
-  const fullHash = window.location.hash || '#/';
-  
-  // Extract base hash pathway ignoring parameters
-  const queryIdx = fullHash.indexOf('?');
-  const hash = queryIdx !== -1 ? fullHash.substring(0, queryIdx) : fullHash;
-  state.currentRoute = hash;
+  const path = getCurrentRoutePath();
+  state.currentRoute = path;
   
   // Manage layout isolation (hide public header/footer/floating CTA on standalone login)
-  if (hash === '#/admin-login') {
+  if (path === '/admin-login') {
     document.body.classList.add('standalone-auth-active');
     document.body.classList.remove('admin-mode-active');
-  } else if (hash === '#/admin') {
+  } else if (path === '/admin') {
     document.body.classList.remove('standalone-auth-active');
     document.body.classList.add('admin-mode-active');
   } else {
@@ -169,7 +204,7 @@ function router() {
   window.scrollTo({ top: 0, behavior: 'instant' });
   
   // Update SEO Meta
-  updateSEO(hash);
+  updateSEO(path);
 
   // Close mobile navigation drawer if open
   const mobileNav = document.getElementById('mobile-nav-id');
@@ -180,29 +215,29 @@ function router() {
   }
 
   // Fetch reviews if loading the Home page
-  if (hash === '#/') {
+  if (path === '/') {
     fetchReviews().then(() => {
-      renderPage(hash, appContainer);
+      renderPage(path, appContainer);
     });
-  } else if (hash === '#/admin') {
+  } else if (path === '/admin') {
     if (!sessionStorage.getItem('adminToken')) {
-      window.location.hash = '#/admin-login';
+      navigateTo('/admin-login');
       return;
     }
     fetchAdminData().then(() => {
-      renderPage(hash, appContainer);
+      renderPage(path, appContainer);
     });
-  } else if (hash === '#/submit-review') {
-    validateReviewToken(fullHash).then(() => {
-      renderPage(hash, appContainer);
+  } else if (path === '/submit-review') {
+    validateReviewToken().then(() => {
+      renderPage(path, appContainer);
     });
   } else {
-    renderPage(hash, appContainer);
+    renderPage(path, appContainer);
   }
 }
 
-function renderPage(hash, appContainer) {
-  const renderFunc = routes[hash] || renderHome;
+function renderPage(path, appContainer) {
+  const renderFunc = routes[path] || renderHome;
   renderFunc(appContainer);
   
   // Re-initialize Lucide Icons
@@ -217,7 +252,9 @@ function renderPage(hash, appContainer) {
 function updateNavLinks() {
   const activeClassRoute = state.currentRoute;
   document.querySelectorAll('#desktop-nav-id .nav-link').forEach(link => {
-    if (link.getAttribute('href') === activeClassRoute) {
+    let href = link.getAttribute('href') || '';
+    if (href.startsWith('#')) href = href.slice(1);
+    if (href === activeClassRoute) {
       link.classList.add('active');
     } else {
       link.classList.remove('active');
@@ -225,7 +262,9 @@ function updateNavLinks() {
   });
 
   document.querySelectorAll('#mobile-nav-id .mobile-nav-link').forEach(link => {
-    if (link.getAttribute('href') === activeClassRoute) {
+    let href = link.getAttribute('href') || '';
+    if (href.startsWith('#')) href = href.slice(1);
+    if (href === activeClassRoute) {
       link.classList.add('active');
     } else {
       link.classList.remove('active');
@@ -233,8 +272,8 @@ function updateNavLinks() {
   });
 }
 
-function updateSEO(hash) {
-  const seo = seoConfig[hash] || seoConfig['#/'];
+function updateSEO(path) {
+  const seo = seoConfig[path] || seoConfig['/'];
   document.title = seo.title;
   
   let metaDesc = document.querySelector('meta[name="description"]');
@@ -361,21 +400,21 @@ async function fetchAdminData() {
   }
 }
 
-async function validateReviewToken(fullHash) {
-  const queryIdx = fullHash.indexOf('?');
+async function validateReviewToken() {
   state.reviewToken = '';
   state.reviewInviteStatus = 'invalid';
   state.reviewInviteName = '';
   state.reviewInviteVehicle = '';
 
-  if (queryIdx === -1) {
-    state.reviewInviteStatus = 'invalid';
-    return;
+  let searchParams = new URLSearchParams(window.location.search);
+  let token = searchParams.get('token');
+
+  // Fallback to legacy hash params if present
+  if (!token && window.location.hash.includes('?')) {
+    const hashQuery = window.location.hash.substring(window.location.hash.indexOf('?'));
+    token = new URLSearchParams(hashQuery).get('token');
   }
 
-  const searchParams = new URLSearchParams(fullHash.substring(queryIdx));
-  const token = searchParams.get('token');
-  
   if (!token) {
     state.reviewInviteStatus = 'invalid';
     return;
@@ -657,8 +696,8 @@ function renderHome(container) {
           <h1>Engine Tuning & <br><span class="accent-text">Heavy 4WD Repairs</span></h1>
           <p>Premium electronic diagnostic scanner runs, torque tuning, DPF/EGR cleaning, and complete diesel engine rebuilds. We specialize in Nissan Patrol, Toyota Hilux, Prado, and Mitsubishi Pajero models.</p>
           <div class="hero-actions">
-            <a href="#/booking" class="btn btn-primary" title="Book service via WhatsApp"><i data-lucide="calendar"></i> Book Online Now</a>
-            <a href="#/services" class="btn btn-secondary" title="View mechanical services">Explore Our Services</a>
+            <a href="/booking" class="btn btn-primary" title="Book service via WhatsApp"><i data-lucide="calendar"></i> Book Online Now</a>
+            <a href="/services" class="btn btn-secondary" title="View mechanical services">Explore Our Services</a>
           </div>
         </div>
 
@@ -742,7 +781,7 @@ function renderHome(container) {
           </div>
           
           <div style="text-align: center; margin-top: 3rem;">
-            <a href="#/booking" class="btn btn-primary" title="Book this estimated service"><i data-lucide="calendar"></i> Book Service with this Estimate</a>
+            <a href="/booking" class="btn btn-primary" title="Book this estimated service"><i data-lucide="calendar"></i> Book Service with this Estimate</a>
           </div>
         </div>
 
@@ -769,7 +808,7 @@ function renderHome(container) {
               <div class="timeline-card-asym-info">
                 <h3>OBD2 Diagnostic Checks</h3>
                 <p>Equipped with state-of-the-art diagnostic code scanning systems, we pinpoint sensor faults, exhaust restrictions, and pressure drop errors.</p>
-                <a href="#/services" class="learn-more-link" title="Explore Diagnostics">Explore Scans <i data-lucide="arrow-right"></i></a>
+                <a href="/services" class="learn-more-link" title="Explore Diagnostics">Explore Scans <i data-lucide="arrow-right"></i></a>
               </div>
             </div>
 
@@ -777,7 +816,7 @@ function renderHome(container) {
               <div class="timeline-card-asym-info">
                 <h3>Performance ECU Tuning</h3>
                 <p>Reprogram fuel rail pressure curves, boost schedules, and torque maps safely to unlock power for off-road crawls or heavy towing.</p>
-                <a href="#/tuning" class="learn-more-link" title="Explore Tuning Page">Explore Tuning <i data-lucide="arrow-right"></i></a>
+                <a href="/tuning" class="learn-more-link" title="Explore Tuning Page">Explore Tuning <i data-lucide="arrow-right"></i></a>
               </div>
             </div>
 
@@ -791,7 +830,7 @@ function renderHome(container) {
               <div class="timeline-card-asym-info">
                 <h3>4x4 Off-Road Upgrades</h3>
                 <p>Installation of heavy-duty suspension lift kits, differential lockers, wheel hubs, and custom accessory fittings for extreme mud prep.</p>
-                <a href="#/4x4" class="learn-more-link" title="Explore 4x4 Specialist Page">Explore 4x4 Upgrades <i data-lucide="arrow-right"></i></a>
+                <a href="/4x4" class="learn-more-link" title="Explore 4x4 Specialist Page">Explore 4x4 Upgrades <i data-lucide="arrow-right"></i></a>
               </div>
             </div>
 
@@ -799,7 +838,7 @@ function renderHome(container) {
               <div class="timeline-card-asym-info">
                 <h3>Total Engine Rebuilds</h3>
                 <p>Complete block cleaning, crankshaft grinds, head surfacing, piston ring replacements, and compression calibrations.</p>
-                <a href="#/services" class="learn-more-link" title="Explore Engine Machining">Explore Engine Rebuilds <i data-lucide="arrow-right"></i></a>
+                <a href="/services" class="learn-more-link" title="Explore Engine Machining">Explore Engine Rebuilds <i data-lucide="arrow-right"></i></a>
               </div>
             </div>
 
@@ -843,7 +882,7 @@ function renderHome(container) {
         <h2>Restore Your Diesel Engine's Peak Potential</h2>
         <p>Book your mechanical check or dyno tuning run now. Our team will contact you directly on WhatsApp to coordinate slot presets.</p>
         <div class="action-buttons">
-          <a href="#/booking" class="btn btn-primary" title="Book Online"><i data-lucide="calendar"></i> Book Online Now</a>
+          <a href="/booking" class="btn btn-primary" title="Book Online"><i data-lucide="calendar"></i> Book Online Now</a>
           <a href="tel:+642102583793" class="btn btn-secondary" title="Call Us"><i data-lucide="phone"></i> Call 021 0258 3793</a>
         </div>
       </div>
@@ -878,7 +917,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Compression Leak checks</div>
               <div class="service-feature"><i data-lucide="check"></i> Turbocharger Boost Analysis</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Diagnostic')" title="Book diagnostic scan service"><i data-lucide="calendar"></i> Schedule Diagnostic Scan</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Diagnostic')" title="Book diagnostic scan service"><i data-lucide="calendar"></i> Schedule Diagnostic Scan</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -899,7 +938,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Belt & Chain tension checks</div>
               <div class="service-feature"><i data-lucide="check"></i> Antifreeze Cooling Flush</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Regular Maintenance')" title="Book routine filter maintenance"><i data-lucide="calendar"></i> Schedule Filter Maintenance</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Regular Maintenance')" title="Book routine filter maintenance"><i data-lucide="calendar"></i> Schedule Filter Maintenance</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -920,7 +959,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Improved Fuel Efficiency Maps</div>
               <div class="service-feature"><i data-lucide="check"></i> EGR/DPF Clean Services</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Performance Upgrade')" title="Book custom performance tuning"><i data-lucide="calendar"></i> Schedule Tuning Check</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Performance Upgrade')" title="Book custom performance tuning"><i data-lucide="calendar"></i> Schedule Tuning Check</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -941,7 +980,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Hub & Bearing Adjustments</div>
               <div class="service-feature"><i data-lucide="check"></i> Heavy-Duty Offroad Clutch</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" title="Book differential and 4x4 repairs"><i data-lucide="calendar"></i> Schedule 4WD Repair</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" title="Book differential and 4x4 repairs"><i data-lucide="calendar"></i> Schedule 4WD Repair</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -962,7 +1001,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Braking & Suspension checks</div>
               <div class="service-feature"><i data-lucide="check"></i> Multi-vehicle Priority Checks</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Regular Maintenance')" title="Book fleet prioritry inspection"><i data-lucide="calendar"></i> Schedule Fleet Inspection</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Regular Maintenance')" title="Book fleet prioritry inspection"><i data-lucide="calendar"></i> Schedule Fleet Inspection</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -983,7 +1022,7 @@ function renderServices(container) {
               <div class="service-feature"><i data-lucide="check"></i> Valve & Guide replacements</div>
               <div class="service-feature"><i data-lucide="check"></i> Bearing journals sizing</div>
             </div>
-            <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" title="Book block overhaul consult"><i data-lucide="calendar"></i> Schedule Rebuild Consult</a>
+            <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" title="Book block overhaul consult"><i data-lucide="calendar"></i> Schedule Rebuild Consult</a>
           </div>
           <div class="service-row-img-col">
             <div class="service-row-img">
@@ -1096,7 +1135,7 @@ function renderTuning(container) {
             <li class="feature-item"><i data-lucide="droplet"></i> Fuel Savings up to 1.5L/100km</li>
             <li class="feature-item"><i data-lucide="activity"></i> Custom Dynamometer Verifications</li>
           </ul>
-          <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Performance Upgrade')" style="margin-top: 2rem;"><i data-lucide="calendar"></i> Book ECU Tuning Session</a>
+          <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Performance Upgrade')" style="margin-top: 2rem;"><i data-lucide="calendar"></i> Book ECU Tuning Session</a>
         </div>
         <div class="split-image animate-on-scroll">
           <img src="images/service_tuning.png" alt="Diesel truck undergoing performance ECU remapping on dyno rollers">
@@ -1166,7 +1205,7 @@ function render4x4(container) {
             <li class="feature-item"><i data-lucide="link"></i> Heavy-Duty Drivetrain Parts</li>
             <li class="feature-item"><i data-lucide="shield-check"></i> Transfer Case Overhauling</li>
           </ul>
-          <a href="#/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" style="margin-top: 2rem;"><i data-lucide="calendar"></i> Book 4x4 Upgrades</a>
+          <a href="/booking" class="btn btn-primary" onclick="setServicePreference('Repair')" style="margin-top: 2rem;"><i data-lucide="calendar"></i> Book 4x4 Upgrades</a>
         </div>
       </div>
     </section>
@@ -1524,7 +1563,7 @@ function renderBooking(container) {
                   <button type="button" class="btn btn-secondary" onclick="resetBookingForm()">
                     <i data-lucide="plus-circle"></i> Create Another Booking
                   </button>
-                  <a href="#/" class="btn btn-outline-primary">
+                  <a href="/" class="btn btn-outline-primary">
                     <i data-lucide="home"></i> Return Home
                   </a>
                 </div>
@@ -1812,7 +1851,7 @@ function renderAdminLogin(container) {
   container.innerHTML = `
     <div class="auth-standalone-wrapper">
       <div class="auth-brand-header">
-        <a href="#/" class="auth-brand-logo" title="Return to Diesel Drive Website">
+        <a href="/" class="auth-brand-logo" title="Return to Diesel Drive Website">
           DIESEL<span class="accent-text">DRIVE</span>
         </a>
         <div>
@@ -1859,7 +1898,7 @@ function renderAdminLogin(container) {
         </form>
 
         <div class="auth-card-footer">
-          <a href="#/" class="auth-back-link">
+          <a href="/" class="auth-back-link">
             <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
             <span>Return to Diesel Drive Website</span>
           </a>
@@ -1901,7 +1940,7 @@ window.handleAdminLoginSubmit = async function(event) {
       const data = await res.json();
       sessionStorage.setItem('adminToken', data.token);
       showToast('Logged In', 'Welcome back, Owner account authenticated.', 'success');
-      window.location.hash = '#/admin';
+      navigateTo('/admin');
     } else {
       showToast('Auth Failure', 'Incorrect administrator username or password.', 'error');
     }
@@ -2200,7 +2239,7 @@ function renderAdminDashboard(container) {
         <!-- Admin Top Navigation Header -->
         <div class="admin-top-bar">
           <div class="admin-top-brand">
-            <a href="#/admin" class="logo" style="font-size: 1.5rem;">
+            <a href="/admin" class="logo" style="font-size: 1.5rem;">
               DIESEL<span class="accent-text">DRIVE</span>
             </a>
             <span class="admin-title-badge">Owner Management Portal</span>
@@ -2210,7 +2249,7 @@ function renderAdminDashboard(container) {
               <span class="status-dot"></span>
               <span>${state.currentAdminUsername || 'Owner Administrator'}</span>
             </div>
-            <a href="#/" target="_blank" class="btn-admin-header btn-admin-view-site" title="Open Public Website">
+            <a href="/" target="_blank" class="btn-admin-header btn-admin-view-site" title="Open Public Website">
               <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
               <span>View Website</span>
             </a>
@@ -2323,7 +2362,7 @@ window.switchAdminTab = function(tabName) {
 window.handleAdminLogout = function() {
   sessionStorage.removeItem('adminToken');
   showToast('Logged Out', 'Successfully logged out from owner dashboard.', 'success');
-  window.location.hash = '#/';
+  navigateTo('/');
 };
 
 window.togglePasswordVisibility = function(inputId, iconId) {
@@ -2463,8 +2502,7 @@ window.handleGenerateInviteSubmit = async function(event) {
 
     if (res.ok) {
       const data = await res.json();
-      const currentPath = window.location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '');
-      const baseUrl = `${window.location.origin}${currentPath}/#/submit-review`;
+      const baseUrl = `${window.location.origin}${BASE_PATH}/submit-review`;
       state.generatedInviteUrl = `${baseUrl}?token=${data.token}`;
       showToast('Token Generated', 'Unique one-time link created successfully.', 'success');
       router();
@@ -2509,7 +2547,7 @@ function renderSubmitReview(container) {
         <p style="font-size: 0.95rem; color: var(--text-gray); margin-top: 0.8rem; max-width: 450px; margin-left: auto; margin-right: auto;">
           This review link is invalid or has expired. Please contact the workshop to request a new feedback link.
         </p>
-        <a href="#/" class="btn btn-secondary" style="margin-top: 2rem;"><i data-lucide="home"></i> Return to Homepage</a>
+        <a href="/" class="btn btn-secondary" style="margin-top: 2rem;"><i data-lucide="home"></i> Return to Homepage</a>
       </div>
     `;
   } else if (state.reviewInviteStatus === 'used') {
@@ -2520,7 +2558,7 @@ function renderSubmitReview(container) {
         <p style="font-size: 0.95rem; color: var(--text-gray); margin-top: 0.8rem; max-width: 450px; margin-left: auto; margin-right: auto;">
           Thank you! You have already submitted feedback using this invitation. We appreciate your review and look forward to servicing your vehicle in the future.
         </p>
-        <a href="#/" class="btn btn-secondary" style="margin-top: 2rem;"><i data-lucide="home"></i> Return to Homepage</a>
+        <a href="/" class="btn btn-secondary" style="margin-top: 2rem;"><i data-lucide="home"></i> Return to Homepage</a>
       </div>
     `;
   } else if (state.reviewInviteStatus === 'valid') {
@@ -2697,7 +2735,7 @@ window.handleClientReviewSubmit = async function(event) {
       state.selectedRating = 5;
 
       setTimeout(() => {
-        window.location.hash = '#/';
+        navigateTo('/');
       }, 1500);
     } else {
       const errRes = await res.json();
@@ -2719,6 +2757,24 @@ window.handleClientReviewSubmit = async function(event) {
   }
 };
 
+// Global Link Interceptor for Clean SPA Routing
+document.addEventListener('click', (e) => {
+  const anchor = e.target.closest('a');
+  if (!anchor) return;
+  if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+
+  const href = anchor.getAttribute('href');
+  if (!href) return;
+  if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('tel:') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
+
+  // Intercept internal path routing and legacy hash links
+  if (href.startsWith('/') || href.startsWith('#/')) {
+    e.preventDefault();
+    navigateTo(href);
+  }
+});
+
 // 12. Initializer
+window.addEventListener('popstate', router);
 window.addEventListener('hashchange', router);
-window.addEventListener('load', router);
+window.addEventListener('DOMContentLoaded', router);

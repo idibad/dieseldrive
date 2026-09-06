@@ -372,6 +372,14 @@ app.post('/api/invites', (req, res) => {
   });
 });
 
+// SPA Fallback for HTML5 History API Routing (when accessed directly via Express)
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Start Express Server
 app.listen(PORT, () => {
   console.log(`Server running at http://127.0.0.1:${PORT}/`);

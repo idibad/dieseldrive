@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- GitHub Pages SPA Redirect Decoder (Restores clean URL from 404.html redirect) -->
+  <script type="text/javascript">
+    (function(l) {
+      if (l.search[1] === '/' ) {
+        var decoded = l.search.slice(1).split('&').map(function(s) { 
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    }(window.location));
+  </script>
   <title>Diesel Drive | Auckland's Premier Diesel & SUV Specialists</title>
   
   <!-- SEO Meta Tags -->
@@ -44,7 +58,7 @@
         "https://dieseldrive.co.nz/images/hero_4x4.png",
         "https://dieseldrive.co.nz/images/service_diagnostics.png"
       ],
-      "@id": "https://dieseldrive.co.nz/#/contact",
+      "@id": "https://dieseldrive.co.nz/contact",
       "url": "https://dieseldrive.co.nz",
       "telephone": "+642102583793",
       "priceRange": "$$",
@@ -108,18 +122,18 @@
   <!-- Header / Navigation (Upgraded modern layout) -->
   <header class="main-header" id="main-header-id">
     <div class="container header-flex">
-      <a href="#/" class="logo" id="logo-id">
+      <a href="/" class="logo" id="logo-id">
         DIESEL<span class="accent-text">DRIVE</span>
       </a>
       
       <!-- Desktop Nav Links -->
       <nav class="desktop-nav" id="desktop-nav-id">
-        <a href="#/" class="nav-link" id="nav-home-id" title="Diesel Drive Home Page">Home</a>
-        <a href="#/services" class="nav-link" id="nav-services-id" title="Specialist Mechanical Services">Services</a>
-        <a href="#/tuning" class="nav-link" id="nav-tuning-id" title="Performance ECU Remapping & Tuning">Tuning</a>
-        <a href="#/4x4" class="nav-link" id="nav-4x4-id" title="4WD Lift Kits & Off-road Upgrades">4x4 Specialist</a>
-        <a href="#/contact" class="nav-link" id="nav-contact-id" title="Contact Us & Map Location">Contact</a>
-        <a href="#/booking" class="btn btn-primary" id="nav-booking-id" title="Book Service via WhatsApp"><i data-lucide="calendar"></i> Book Service</a>
+        <a href="/" class="nav-link" id="nav-home-id" title="Diesel Drive Home Page">Home</a>
+        <a href="/services" class="nav-link" id="nav-services-id" title="Specialist Mechanical Services">Services</a>
+        <a href="/tuning" class="nav-link" id="nav-tuning-id" title="Performance ECU Remapping & Tuning">Tuning</a>
+        <a href="/4x4" class="nav-link" id="nav-4x4-id" title="4WD Lift Kits & Off-road Upgrades">4x4 Specialist</a>
+        <a href="/contact" class="nav-link" id="nav-contact-id" title="Contact Us & Map Location">Contact</a>
+        <a href="/booking" class="btn btn-primary" id="nav-booking-id" title="Book Service"><i data-lucide="calendar"></i> Book Service</a>
       </nav>
 
       <!-- Mobile Toggle Button -->
@@ -130,12 +144,12 @@
     
     <!-- Mobile Navigation Drawer -->
     <div class="mobile-nav" id="mobile-nav-id">
-      <a href="#/" class="mobile-nav-link" id="mob-nav-home-id" title="Home Page">Home</a>
-      <a href="#/services" class="mobile-nav-link" id="mob-nav-services-id" title="Specialist Services">Services</a>
-      <a href="#/tuning" class="mobile-nav-link" id="mob-nav-tuning-id" title="Performance ECU Tuning">Tuning</a>
-      <a href="#/4x4" class="mobile-nav-link" id="mob-nav-4x4-id" title="4x4 Lift Kits & Upgrades">4x4 Specialist</a>
-      <a href="#/contact" class="mobile-nav-link" id="mob-nav-contact-id" title="Contact Details">Contact</a>
-      <a href="#/booking" class="btn btn-primary btn-block" id="mob-nav-booking-id" title="Book Service"><i data-lucide="calendar"></i> Book Service</a>
+      <a href="/" class="mobile-nav-link" id="mob-nav-home-id" title="Home Page">Home</a>
+      <a href="/services" class="mobile-nav-link" id="mob-nav-services-id" title="Specialist Services">Services</a>
+      <a href="/tuning" class="mobile-nav-link" id="mob-nav-tuning-id" title="Performance ECU Tuning">Tuning</a>
+      <a href="/4x4" class="mobile-nav-link" id="mob-nav-4x4-id" title="4x4 Lift Kits & Upgrades">4x4 Specialist</a>
+      <a href="/contact" class="mobile-nav-link" id="mob-nav-contact-id" title="Contact Details">Contact</a>
+      <a href="/booking" class="btn btn-primary btn-block" id="mob-nav-booking-id" title="Book Service"><i data-lucide="calendar"></i> Book Service</a>
     </div>
   </header>
 
@@ -167,13 +181,13 @@
       <div class="footer-col links-col">
         <h4 class="footer-heading">Navigation</h4>
         <ul class="footer-links-list">
-          <li><a href="#/" title="Home Page">Home Page</a></li>
-          <li><a href="#/services" title="Our Services">Specialist Services</a></li>
-          <li><a href="#/tuning" title="ECU Remapping Details">Performance Tuning</a></li>
-          <li><a href="#/4x4" title="4x4 Lift Kits and Diffs">4x4 Upgrades</a></li>
-          <li><a href="#/contact" title="Get in touch with us">Contact Us</a></li>
-          <li><a href="#/booking" title="Schedule booking online">Online Booking</a></li>
-          <li><a href="#/admin-login" title="Owner Administration Gate">Owner Portal</a></li>
+          <li><a href="/" title="Home Page">Home Page</a></li>
+          <li><a href="/services" title="Our Services">Specialist Services</a></li>
+          <li><a href="/tuning" title="ECU Remapping Details">Performance Tuning</a></li>
+          <li><a href="/4x4" title="4x4 Lift Kits and Diffs">4x4 Upgrades</a></li>
+          <li><a href="/contact" title="Get in touch with us">Contact Us</a></li>
+          <li><a href="/booking" title="Schedule booking online">Online Booking</a></li>
+          <li><a href="/admin-login" title="Owner Administration Gate">Owner Portal</a></li>
         </ul>
       </div>
 
@@ -181,11 +195,11 @@
       <div class="footer-col services-col">
         <h4 class="footer-heading">Our Services</h4>
         <ul class="footer-links-list">
-          <li><a href="#/services" title="Diesel Engine Diagnostic Scan">Diagnostics & Tuning</a></li>
-          <li><a href="#/services" title="4WD and SUV Suspension Repairs">4WD & SUV Repairs</a></li>
-          <li><a href="#/services" title="Diesel Engine Complete Rebuild">Engine Rebuilds</a></li>
-          <li><a href="#/services" title="Routine Lubrication Service">Routine Servicing</a></li>
-          <li><a href="#/services" title="Commercial Truck and Van Maintenance">Commercial Fleet Care</a></li>
+          <li><a href="/services" title="Diesel Engine Diagnostic Scan">Diagnostics & Tuning</a></li>
+          <li><a href="/services" title="4WD and SUV Suspension Repairs">4WD & SUV Repairs</a></li>
+          <li><a href="/services" title="Diesel Engine Complete Rebuild">Engine Rebuilds</a></li>
+          <li><a href="/services" title="Routine Lubrication Service">Routine Servicing</a></li>
+          <li><a href="/services" title="Commercial Truck and Van Maintenance">Commercial Fleet Care</a></li>
         </ul>
       </div>
 
@@ -219,16 +233,16 @@
       <div class="container bottom-flex">
         <p class="copyright-text">&copy; <span id="copyright-year">2026</span> Diesel Drive. All rights reserved.</p>
         <div class="bottom-links">
-          <a href="#/" title="Privacy Policy statement">Privacy Policy</a>
-          <a href="#/" title="Terms of Service terms">Terms of Service</a>
-          <a href="#/" title="Website Map sitemap">Sitemap</a>
+          <a href="/" title="Privacy Policy statement">Privacy Policy</a>
+          <a href="/" title="Terms of Service terms">Terms of Service</a>
+          <a href="/" title="Website Map sitemap">Sitemap</a>
         </div>
       </div>
     </div>
   </footer>
 
   <!-- Floating Quick Conversion CTA -->
-  <a href="#/booking" class="floating-quick-cta" title="Instant Service Booking">
+  <a href="/booking" class="floating-quick-cta" title="Instant Service Booking">
     <div class="floating-pulse-dot"></div>
     <i data-lucide="calendar"></i>
     <span>Book Online / 021 0258 3793</span>
