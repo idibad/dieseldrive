@@ -2300,7 +2300,7 @@ function renderAdminDashboard(container) {
             </div>
           </div>
 
-          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="form-grid admin-sec-grid">
             <div class="form-group">
               <label for="sec-new-user" style="font-weight: 700; font-size: 0.88rem; color: var(--carbon-dark); margin-bottom: 0.5rem; display: block;">New Username <span style="color: #EF4444;">*</span></label>
               <input type="text" id="sec-new-user" class="form-input" required minlength="3" value="${state.currentAdminUsername || 'admin'}" placeholder="e.g. workshop_owner" style="width: 100%;">
@@ -2350,14 +2350,16 @@ function renderAdminDashboard(container) {
               <span class="status-dot"></span>
               <span>${state.currentAdminUsername || 'Owner Administrator'}</span>
             </div>
-            <a href="/" target="_blank" class="btn-admin-header btn-admin-view-site" title="Open Public Website">
-              <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-              <span>View Website</span>
-            </a>
-            <button class="btn-admin-header btn-admin-logout" onclick="handleAdminLogout()" title="Log out from dashboard">
-              <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
-              <span>Sign Out</span>
-            </button>
+            <div class="admin-top-actions-buttons">
+              <a href="/" target="_blank" class="btn-admin-header btn-admin-view-site" title="Open Public Website">
+                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                <span>View Website</span>
+              </a>
+              <button class="btn-admin-header btn-admin-logout" onclick="handleAdminLogout()" title="Log out from dashboard">
+                <i data-lucide="log-out" style="width: 14px; height: 14px;"></i>
+                <span>Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
 
