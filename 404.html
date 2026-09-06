@@ -1,25 +1,134 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset=utf-8>
-    <title>Diesel Drive</title>
-    <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License: https://github.com/rafgraph/spa-github-pages
-      var pathSegmentsToKeep = 0;
-      if (window.location.pathname.indexOf('/dieseldrive') === 0) {
-        pathSegmentsToKeep = 1;
-      }
-      var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
-    </script>
-  </head>
-  <body>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | Diesel Drive Auckland</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/images/service_diagnostics.png">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="/style.css">
+
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages
+    // MIT License: https://github.com/rafgraph/spa-github-pages
+    var pathSegmentsToKeep = 0;
+    if (window.location.pathname.indexOf('/dieseldrive') === 0) {
+      pathSegmentsToKeep = 1;
+    }
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body>
+  <!-- Standalone Header for 404 -->
+  <header class="main-header">
+    <div class="container header-flex">
+      <a href="/" class="logo">
+        DIESEL<span class="accent-text">DRIVE</span>
+      </a>
+      <nav class="desktop-nav">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/services" class="nav-link">Services</a>
+        <a href="/tuning" class="nav-link">Tuning</a>
+        <a href="/4x4" class="nav-link">4x4 Specialist</a>
+        <a href="/contact" class="nav-link">Contact</a>
+        <a href="/booking" class="btn btn-primary">Book Service</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 404 View Body -->
+  <main>
+    <div class="not-found-wrapper">
+      <div class="container not-found-container">
+        
+        <div class="not-found-badge">
+          <span>DIAGNOSTIC FAULT: 0x404_PAGE_NOT_FOUND</span>
+        </div>
+
+        <div class="not-found-code-display">
+          <span class="not-found-digits">4<span class="accent-text">0</span>4</span>
+        </div>
+
+        <h1 class="not-found-title">Engine Stall &bull; Route Not Found</h1>
+
+        <p class="not-found-desc">
+          Looks like you've gone off-grid. The mechanical spec sheet, diagnostic tool, or page you were trying to access doesn't exist, has been relocated, or is undergoing workshop maintenance.
+        </p>
+
+        <div class="not-found-actions">
+          <a href="/" class="btn btn-primary" title="Return to Homepage">
+            Return to Homepage
+          </a>
+          <a href="/services" class="btn btn-secondary" title="Explore Workshop Services">
+            Specialist Services
+          </a>
+          <a href="/booking" class="btn btn-secondary" title="Book Online">
+            Book Online
+          </a>
+          <a href="/contact" class="btn btn-outline-primary" title="Contact Us">
+            Contact Workshop
+          </a>
+        </div>
+
+        <div class="not-found-card glass-card">
+          <h3 class="not-found-card-title">Quick Navigation Directory</h3>
+          <div class="not-found-links-grid">
+            <a href="/" class="not-found-link-item">
+              <div>
+                <strong>Home</strong>
+                <small>Workshop overview & verified reviews</small>
+              </div>
+            </a>
+            <a href="/services" class="not-found-link-item">
+              <div>
+                <strong>Diagnostics & Rebuilds</strong>
+                <small>Dealer-level mechanical repairs</small>
+              </div>
+            </a>
+            <a href="/tuning" class="not-found-link-item">
+              <div>
+                <strong>ECU Remapping & Tuning</strong>
+                <small>Dyno profiles, towing & torque</small>
+              </div>
+            </a>
+            <a href="/4x4" class="not-found-link-item">
+              <div>
+                <strong>4x4 Specialist Upgrades</strong>
+                <small>Lift kits, diffs & off-road mud gear</small>
+              </div>
+            </a>
+            <a href="/booking" class="not-found-link-item">
+              <div>
+                <strong>Online Booking</strong>
+                <small>Reserve your workshop slot</small>
+              </div>
+            </a>
+            <a href="/contact" class="not-found-link-item">
+              <div>
+                <strong>Workshop Location</strong>
+                <small>31c Atkinson Ave, Otahuhu</small>
+              </div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</body>
 </html>

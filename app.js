@@ -122,10 +122,14 @@ const seoConfig = {
   '/submit-review': {
     title: 'Leave a Service Review | Diesel Drive',
     description: 'We value your feedback. Leave a service rating and comment for your vehicle repairs.'
+  },
+  '/404': {
+    title: '404 - Page Not Found | Diesel Drive Auckland',
+    description: 'The requested page or diagnostic route could not be found. Return to Diesel Drive Auckland homepage or browse our specialist mechanical services.'
   }
 };
 
-// 3. SPA Router (9 Routes)
+// 3. SPA Router (10 Routes)
 const routes = {
   '/': renderHome,
   '/services': renderServices,
@@ -135,7 +139,8 @@ const routes = {
   '/booking': renderBooking,
   '/admin-login': renderAdminLogin,
   '/admin': renderAdminDashboard,
-  '/submit-review': renderSubmitReview
+  '/submit-review': renderSubmitReview,
+  '/404': renderNotFound
 };
 
 function getCurrentRoutePath() {
@@ -214,7 +219,7 @@ function router() {
     if (menuIcon) menuIcon.setAttribute('data-lucide', 'menu');
   }
 
-  // Fetch reviews if loading the Home page
+  // Route matching
   if (path === '/') {
     fetchReviews().then(() => {
       renderPage(path, appContainer);
@@ -231,13 +236,18 @@ function router() {
     validateReviewToken().then(() => {
       renderPage(path, appContainer);
     });
-  } else {
+  } else if (routes[path]) {
     renderPage(path, appContainer);
+  } else {
+    // Unrecognized route -> 404
+    renderNotFound(appContainer);
+    if (window.lucide) window.lucide.createIcons();
+    setupScrollAnimations();
   }
 }
 
 function renderPage(path, appContainer) {
-  const renderFunc = routes[path] || renderHome;
+  const renderFunc = routes[path] || renderNotFound;
   renderFunc(appContainer);
   
   // Re-initialize Lucide Icons
@@ -273,7 +283,7 @@ function updateNavLinks() {
 }
 
 function updateSEO(path) {
-  const seo = seoConfig[path] || seoConfig['/'];
+  const seo = seoConfig[path] || seoConfig['/404'] || seoConfig['/'];
   document.title = seo.title;
   
   let metaDesc = document.querySelector('meta[name="description"]');
@@ -1841,6 +1851,97 @@ window.resetBookingForm = function() {
     mainCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
+
+// ==========================================================================
+// 404 NOT FOUND VIEW
+// ==========================================================================
+function renderNotFound(container) {
+  container.innerHTML = `
+    <div class="not-found-wrapper">
+      <div class="container not-found-container zoom-in-up">
+        
+        <div class="not-found-badge">
+          <i data-lucide="alert-triangle"></i>
+          <span>DIAGNOSTIC FAULT: 0x404_PAGE_NOT_FOUND</span>
+        </div>
+
+        <div class="not-found-code-display">
+          <span class="not-found-digits">4<span class="accent-text">0</span>4</span>
+        </div>
+
+        <h1 class="not-found-title">Engine Stall &bull; Route Not Found</h1>
+
+        <p class="not-found-desc">
+          Looks like you've gone off-grid. The mechanical spec sheet, diagnostic tool, or page you were trying to access doesn't exist, has been relocated, or is undergoing workshop maintenance.
+        </p>
+
+        <div class="not-found-actions">
+          <a href="/" class="btn btn-primary" title="Return to Homepage">
+            <i data-lucide="home"></i> Return to Homepage
+          </a>
+          <a href="/services" class="btn btn-secondary" title="Explore Workshop Services">
+            <i data-lucide="wrench"></i> Specialist Services
+          </a>
+          <a href="/booking" class="btn btn-secondary" title="Book Online">
+            <i data-lucide="calendar"></i> Book Online
+          </a>
+          <a href="/contact" class="btn btn-outline-primary" title="Contact Us">
+            <i data-lucide="phone"></i> Contact Workshop
+          </a>
+        </div>
+
+        <div class="not-found-card glass-card">
+          <h3 class="not-found-card-title"><i data-lucide="compass"></i> Quick Navigation Directory</h3>
+          <div class="not-found-links-grid">
+            <a href="/" class="not-found-link-item">
+              <i data-lucide="home"></i>
+              <div>
+                <strong>Home</strong>
+                <small>Workshop overview & verified reviews</small>
+              </div>
+            </a>
+            <a href="/services" class="not-found-link-item">
+              <i data-lucide="cpu"></i>
+              <div>
+                <strong>Diagnostics & Rebuilds</strong>
+                <small>Dealer-level mechanical repairs</small>
+              </div>
+            </a>
+            <a href="/tuning" class="not-found-link-item">
+              <i data-lucide="zap"></i>
+              <div>
+                <strong>ECU Remapping & Tuning</strong>
+                <small>Dyno profiles, towing & torque</small>
+              </div>
+            </a>
+            <a href="/4x4" class="not-found-link-item">
+              <i data-lucide="shield"></i>
+              <div>
+                <strong>4x4 Specialist Upgrades</strong>
+                <small>Lift kits, diffs & off-road mud gear</small>
+              </div>
+            </a>
+            <a href="/booking" class="not-found-link-item">
+              <i data-lucide="calendar"></i>
+              <div>
+                <strong>Online Booking</strong>
+                <small>Reserve your workshop slot</small>
+              </div>
+            </a>
+            <a href="/contact" class="not-found-link-item">
+              <i data-lucide="map-pin"></i>
+              <div>
+                <strong>Workshop Location</strong>
+                <small>31c Atkinson Ave, Otahuhu</small>
+              </div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
 
 // ==========================================================================
 // NEW PAGES: OWNER ADMIN LOGIN & DASHBOARD
